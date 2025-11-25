@@ -1,53 +1,14 @@
 @echo off
-setlocal enabledelayedexpansion
+REM 
+echo Æô¶¯ÓÎÏ·ÒıÇæ...
 
-rem åˆ›å»ºç¼–è¯‘ç›®å½•
-if not exist "build\classes" mkdir "build\classes"
+REM ±àÒë
+call compile.bat
 
-rem è®¾ç½®ç±»è·¯å¾„
-set "LWJGL_CP=."
-if exist "lib\lwjgl" (
-  set "LWJGL_CP=.;lib\lwjgl\*"
-)
-
-rem æŸ¥æ‰¾æ‰€æœ‰ Java æºæ–‡ä»¶
-set "SOURCES="
-for /r "src\main\java" %%f in (*.java) do (
-  set "SOURCES=!SOURCES! %%f"
-)
-
-rem ç¼–è¯‘
-echo Compiling Java sources...
-javac -encoding UTF-8 -d build\classes -cp "%LWJGL_CP%" %SOURCES%
-if errorlevel 1 (
-  echo Compilation failed!
-  exit /b 1
-)
-echo Compilation successful.
-
-rem è®¾ç½®è¿è¡Œæ—¶ç±»è·¯å¾„
-set "CLASSPATH=build\classes"
-if exist "lib\lwjgl" (
-  set "CLASSPATH=build\classes;lib\lwjgl\*"
-)
-
-rem è®¡ç®— natives è·¯å¾„
-set "OS_ID=windows"
-if /i "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-  set "ARCH_ID=x86_64"
-) else if /i "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
-  set "ARCH_ID=arm64"
+if %errorlevel% equ 0 (
+    echo ÔËĞĞÓÎÏ·...
+    java -cp build\classes com.gameengine.example.GameExample
 ) else (
-  set "ARCH_ID=x86_64"
+    echo ±àÒëÊ§°Ü£¬ÎŞ·¨ÔËĞĞÓÎÏ·
+    exit /b 1
 )
-
-rem è®¾ç½® LWJGL natives è·¯å¾„
-set "JAVA_FLAGS="
-set "NATIVES_PATH=lib\lwjgl\natives\%OS_ID%-%ARCH_ID%"
-if exist "%NATIVES_PATH%" (
-  set "JAVA_FLAGS=-Dorg.lwjgl.librarypath=%NATIVES_PATH%"
-)
-
-rem è¿è¡Œç¨‹åº
-echo Running game...
-java %JAVA_FLAGS% -cp "%CLASSPATH%" com.gameengine.example.Game

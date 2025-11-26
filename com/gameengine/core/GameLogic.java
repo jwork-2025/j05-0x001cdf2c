@@ -25,7 +25,7 @@ public class GameLogic {
         this.scene = scene;
         this.inputManager = InputManager.getInstance();
         this.pool = Executors.newFixedThreadPool(10);
-        //固定创建10个线程来处理
+        // 固定创建10个线程来处理
     }
 
     /**
@@ -73,8 +73,8 @@ public class GameLogic {
             pos.y = 0;
         if (pos.x > 1600 - 20)
             pos.x = 1600 - 20;
-        if (pos.y > 1200 - 20)
-            pos.y = 1200 - 20;
+        if (pos.y > 900 - 20)
+            pos.y = 900 - 20;
         transform.setPosition(pos);
     }
 
@@ -82,10 +82,7 @@ public class GameLogic {
      * 更新物理系统
      */
 
-
-
-    private void single_process(PhysicsComponent physics)
-    {
+    private void single_process(PhysicsComponent physics) {
         TransformComponent transform = physics.getOwner().getComponent(TransformComponent.class);
         if (transform != null) {
             Vector2 pos = transform.getPosition();
@@ -95,7 +92,7 @@ public class GameLogic {
                 velocity.x = -velocity.x;
                 physics.setVelocity(velocity);
             }
-            if (pos.y <= 0 || pos.y >= 1200 - 15) {
+            if (pos.y <= 0 || pos.y >= 900 - 15) {
                 velocity.y = -velocity.y;
                 physics.setVelocity(velocity);
             }
@@ -107,28 +104,25 @@ public class GameLogic {
                 pos.y = 0;
             if (pos.x > 1600 - 15)
                 pos.x = 1600 - 15;
-            if (pos.y > 1200 - 15)
-                pos.y = 1200 - 15;
+            if (pos.y > 900 - 15)
+                pos.y = 900 - 15;
             transform.setPosition(pos);
         }
     }
 
-    public void updatePhysics() 
-    {
+    public void updatePhysics() {
         List<PhysicsComponent> physicsComponents = scene.getComponents(PhysicsComponent.class);
-        //这里我们直接计数  要是数量每超过10个  就当做一批任务提交上去  否则串行执行
-        if(physicsComponents.size()<10)
-            for (PhysicsComponent physics : physicsComponents) 
+        // 这里我们直接计数 要是数量每超过10个 就当做一批任务提交上去 否则串行执行
+        if (physicsComponents.size() < 10)
+            for (PhysicsComponent physics : physicsComponents)
                 single_process(physics);
-        else
-        {   
-            //并行处理部分
-            for (int i = 0; i < physicsComponents.size(); i += 10) 
-            {
-                //10个为一组提交
+        else {
+            // 并行处理部分
+            for (int i = 0; i < physicsComponents.size(); i += 10) {
+                // 10个为一组提交
                 int head = i;
-                pool.submit(()->{
-                    for(int j=head;j<head+10;j++)
+                pool.submit(() -> {
+                    for (int j = head; j < head + 10; j++)
                         single_process(physicsComponents.get(j));
                 });
             }
@@ -138,20 +132,19 @@ public class GameLogic {
     /**
      * 检查碰撞
      */
-    private void single_check(GameObject enemy)
-    {
+    private void single_check(GameObject enemy) {
         TransformComponent enemyTransform = enemy.getComponent(TransformComponent.class);
         if (enemyTransform == null)
             return;
 
-        if (1200 - enemyTransform.getPosition().y < 20)// 敌人突破防线
+        if (900 - enemyTransform.getPosition().y < 20)// 敌人突破防线
         {
             List<GameObject> players = scene.findGameObjectsByComponent(TransformComponent.class);// 查找游戏对象
             if (players.isEmpty())
                 return;
 
             GameObject player = players.get(0);
-            player.createOVER();
+            player.gameOver = 1;
         }
         // 直接查找所有游戏对象，然后过滤出子弹
         for (GameObject obj : scene.getGameObjects()) // 对于每一个子弹
@@ -166,12 +159,12 @@ public class GameLogic {
                         enemyTransform.setPosition(new Vector2(0, 0));
                         (enemy.getComponent(PhysicsComponent.class)).setFriction(0.0f);
                         // 也让子弹消失
-                        BulletTransform.setPosition(new Vector2(1600, 1200));
+                        BulletTransform.setPosition(new Vector2(1600, 900));
                         BulletPhysics.setFriction(0.0f);
                         break;
                     }
                     if (BulletTransform.getPosition().y - 0 < 30) {
-                        BulletTransform.setPosition(new Vector2(1600, 1200));
+                        BulletTransform.setPosition(new Vector2(1600, 900));
                         BulletPhysics.setFriction(0.0f);
                     }
                 }
@@ -179,22 +172,30 @@ public class GameLogic {
         }
     }
 
-    public void checkCollisions() 
-    {
+    public int checkCollisions() {
         // 直接查找玩家对象
         List<GameObject> enemys = scene.findGameObjectsByComponent(EnemyComponent.class);
 
         if (enemys.isEmpty())
-            return;
+            return 0;
 
-        //这里直接把每个都变成多线程
-        //并行处理部分
+        // 这里直接把每个都变成多线程
+        // 并行处理部分
         for (int i = 0; i < enemys.size(); i++) // 对于每一个敌人
         {
             GameObject enemy = enemys.get(i);
-            pool.submit(()->{
+            pool.submit(() -> {
                 single_check(enemy);
             });
         }
+        
+        List<GameObject> players = scene.findGameObjectsByComponent(TransformComponent.class);// 查找游戏对象
+        if (players.isEmpty())
+            return 0;
+        GameObject player = players.get(0);
+        if(player.gameOver==1)
+            return 1;
+
+        return 0;
     }
 }

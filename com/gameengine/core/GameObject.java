@@ -7,11 +7,13 @@ import java.util.*;
  * 游戏对象基类，使用泛型组件系统
  */
 public class GameObject {
+    public int gameOver;
     protected boolean active;
     protected String name;
     protected final List<Component<?>> components;
 
     public GameObject() {
+        this.gameOver = 0;
         this.active = true;
         this.name = "GameObject";
         this.components = new ArrayList<>();
@@ -20,6 +22,7 @@ public class GameObject {
     public GameObject(String name) {
         this();
         this.name = name;
+        this.gameOver = 0;
     }
 
     /**

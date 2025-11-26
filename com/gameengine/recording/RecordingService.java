@@ -42,14 +42,18 @@ public class RecordingService {
     }
 
     public void start(Scene scene, int width, int height) throws IOException {
-        if (recording) return;
+        if (recording)
+            return;
         storage.openWriter(config.outputPath);
         writerThread = new Thread(() -> {
             try {
                 while (recording || !lineQueue.isEmpty()) {
                     String s = lineQueue.poll();
                     if (s == null) {
-                        try { Thread.sleep(2); } catch (InterruptedException ignored) {}
+                        try {
+                            Thread.sleep(2);
+                        } catch (InterruptedException ignored) {
+                        }
                         continue;
                     }
                     storage.writeLine(s);
@@ -57,7 +61,10 @@ public class RecordingService {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                try { storage.closeWriter(); } catch (Exception ignored) {}
+                try {
+                    storage.closeWriter();
+                } catch (Exception ignored) {
+                }
             }
         }, "record-writer");
         recording = true;
@@ -69,18 +76,24 @@ public class RecordingService {
     }
 
     public void stop() {
-        if (!recording) return;
+        if (!recording)
+            return;
         try {
             if (lastScene != null) {
                 writeKeyframe(lastScene);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         recording = false;
-        try { writerThread.join(500); } catch (InterruptedException ignored) {}
+        try {
+            writerThread.join(500);
+        } catch (InterruptedException ignored) {
+        }
     }
 
     public void update(double deltaTime, Scene scene, InputManager input) {
-        if (!recording) return;
+        if (!recording)
+            return;
         elapsed += deltaTime;
         keyframeElapsed += deltaTime;
         sampleAccumulator += deltaTime;
@@ -93,7 +106,8 @@ public class RecordingService {
             sb.append("{\"type\":\"input\",\"t\":").append(qfmt.format(elapsed)).append(",\"keys\":[");
             boolean first = true;
             for (Integer k : just) {
-                if (!first) sb.append(',');
+                if (!first)
+                    sb.append(',');
                 sb.append(k);
                 first = false;
             }
@@ -111,38 +125,43 @@ public class RecordingService {
         }
     }
 
-    private boolean writeKeyframe(Scene scene) {
+    private boolean writeKeyframe(Scene scene) 
+    {
         StringBuilder sb = new StringBuilder();
         sb.append("{\"type\":\"keyframe\",\"t\":").append(qfmt.format(elapsed)).append(",\"entities\":[");
         List<GameObject> objs = scene.getGameObjects();
         boolean first = true;
         int count = 0;
-        for (GameObject obj : objs) {
+        for (GameObject obj : objs) 
+        {
             TransformComponent tc = obj.getComponent(TransformComponent.class);
-            if (tc == null) continue;
+            if (tc == null)
+                continue;
             float x = tc.getPosition().x;
             float y = tc.getPosition().y;
-            if (!first) sb.append(',');
+            if (!first)
+                sb.append(',');
             sb.append('{')
-              .append("\"id\":\"").append(obj.getName()).append("\",")
-              .append("\"x\":").append(qfmt.format(x)).append(',')
-              .append("\"y\":").append(qfmt.format(y));
+                    .append("\"id\":\"").append(obj.getName()).append("\",")
+                    .append("\"x\":").append(qfmt.format(x)).append(',')
+                    .append("\"y\":").append(qfmt.format(y));
 
             // 可选渲染信息（若对象带有 RenderComponent，则记录形状、尺寸、颜色）
-            com.gameengine.components.RenderComponent rc = obj.getComponent(com.gameengine.components.RenderComponent.class);
+            com.gameengine.components.RenderComponent rc = obj
+                    .getComponent(com.gameengine.components.RenderComponent.class);
             if (rc != null) {
                 com.gameengine.components.RenderComponent.RenderType rt = rc.getRenderType();
                 com.gameengine.math.Vector2 sz = rc.getSize();
                 com.gameengine.components.RenderComponent.Color col = rc.getColor();
                 sb.append(',')
-                  .append("\"rt\":\"").append(rt.name()).append("\",")
-                  .append("\"w\":").append(qfmt.format(sz.x)).append(',')
-                  .append("\"h\":").append(qfmt.format(sz.y)).append(',')
-                  .append("\"color\":[")
-                  .append(qfmt.format(col.r)).append(',')
-                  .append(qfmt.format(col.g)).append(',')
-                  .append(qfmt.format(col.b)).append(',')
-                  .append(qfmt.format(col.a)).append(']');
+                        .append("\"rt\":\"").append(rt.name()).append("\",")
+                        .append("\"w\":").append(qfmt.format(sz.x)).append(',')
+                        .append("\"h\":").append(qfmt.format(sz.y)).append(',')
+                        .append("\"color\":[")
+                        .append(qfmt.format(col.r)).append(',')
+                        .append(qfmt.format(col.g)).append(',')
+                        .append(qfmt.format(col.b)).append(',')
+                        .append(qfmt.format(col.a)).append(']');
             } else {
                 // 标记自定义渲染（如 Player），方便回放做近似还原
                 sb.append(',').append("\"rt\":\"CUSTOM\"");
@@ -153,7 +172,8 @@ public class RecordingService {
             count++;
         }
         sb.append("]}");
-        if (count == 0) return false;
+        if (count == 0)
+            return false;
         enqueue(sb.toString());
         return true;
     }
@@ -164,5 +184,3 @@ public class RecordingService {
         }
     }
 }
-
-

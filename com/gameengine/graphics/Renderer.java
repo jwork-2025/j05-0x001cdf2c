@@ -120,6 +120,15 @@ public class Renderer extends JFrame {
         gamePanel.addDrawable(new LineDrawable(x1, y1, x2, y2, r, g, b, a));
     }
 
+    public void drawTriangle(float x, float y, float size, float r, float g, float b, float a)
+    {
+        gamePanel.addDrawable(new TriangleDrawable(x, y, size, r, g, b, a));
+    }
+
+    public void drawText(float x, float y, String text, float r, float g, float b, float a)
+    {
+        
+    }
     /**
      * 检查窗口是否应该关闭
      */
@@ -255,5 +264,111 @@ public class Renderer extends JFrame {
             g.setColor(color);
             g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
         }
+    }
+
+    /**
+    * 三角形绘制类（播放按钮样式）
+    */
+    private static class TriangleDrawable implements Drawable 
+    {
+        private float x, y, size;
+        private Color color;
+        private boolean pointingRight; // 控制三角形朝向：true向右，false向左
+
+        /**
+         * 构造函数 - 向右的播放按钮三角形
+         */
+        public TriangleDrawable(float x, float y, float size, float r, float g, float b, float a) {
+            this(x, y, size, r, g, b, a, true);
+        }
+
+        /**
+         * 构造函数 - 可指定朝向的三角形
+         */
+        public TriangleDrawable(float x, float y, float size, float r, float g, float b, float a, boolean pointingRight) {
+            this.x = x;
+            this.y = y;
+            this.size = size;
+            this.color = new Color(r, g, b, a);
+            this.pointingRight = pointingRight;
+        }
+
+        @Override
+        public void draw(Graphics2D g) {
+            g.setColor(color);
+            
+            // 计算三角形的三个顶点
+            int[] xPoints, yPoints;
+            
+            if (pointingRight) {
+                // 向右的三角形（播放按钮）
+                xPoints = new int[] {
+                    (int) x,                    // 左顶点
+                    (int) x,                    // 左顶点（与上一点相同，构成等腰三角形）
+                    (int) (x + size)            // 右顶点（尖端）
+                };
+                yPoints = new int[] {
+                    (int) (y - size / 2),       // 上顶点
+                    (int) (y + size / 2),       // 下顶点
+                    (int) y                     // 中间顶点（尖端）
+                };
+            } else {
+                // 向左的三角形
+                xPoints = new int[] {
+                    (int) (x + size),           // 右顶点
+                    (int) (x + size),           // 右顶点（与上一点相同）
+                    (int) x                     // 左顶点（尖端）
+                };
+                yPoints = new int[] {
+                    (int) (y - size / 2),       // 上顶点
+                    (int) (y + size / 2),       // 下顶点
+                    (int) y                     // 中间顶点（尖端）
+                };
+            }
+            
+            // 绘制填充三角形
+            g.fillPolygon(xPoints, yPoints, 3);
+        }
+    }
+    
+    public void drawLetterR(float x, float y, float size, float r, float g, float b, float a) 
+    {
+        float width = size * 0.6f;
+        
+        // 旋转180°后的左侧竖线（原右侧竖线）
+        drawLine(x + width, y, x + width, y + size, r, g, b, a);
+        
+        // 旋转180°后的顶部横线（原底部横线）
+        drawLine(x + width, y, x + width * 0.2f, y, r, g, b, a);
+        
+        // 旋转180°后的右侧上半部（原左侧下半部）
+        drawLine(x + width * 0.2f, y, x, y + size * 0.2f, r, g, b, a);
+        drawLine(x, y + size * 0.2f, x, y + size * 0.5f, r, g, b, a);
+        
+        // 旋转180°后的中间横线（原中间横线位置不变）
+        drawLine(x + width, y + size * 0.5f, x, y + size * 0.5f, r, g, b, a);
+        
+        // 旋转180°后的右下斜线（原左上斜线）
+        drawLine(x, y + size * 0.5f, x - width * 0.3f, y + size, r, g, b, a);
+    }
+    public void drawLetterRDetailedMirrored(float x, float y, float size, float r, float g, float b, float a) 
+    {
+        float width = size * 0.6f;
+
+        // 镜像后的左侧竖线（原右侧竖线）
+        drawLine(x + width, y, x + width, y + size, r, g, b, a);
+
+        // 镜像后的顶部横线
+        drawLine(x + width, y + size, x + width * 0.2f, y + size, r, g, b, a);
+
+        // 镜像后的右侧上半部
+        drawLine(x + width * 0.2f, y + size, x, y + size * 0.8f, r, g, b, a);
+        drawLine(x, y + size * 0.8f, x, y + size * 0.5f, r, g, b, a);
+
+        // 镜像后的中间横线
+        drawLine(x + width, y + size * 0.5f, x, y + size * 0.5f, r, g, b, a);
+
+        // 镜像后的右下斜线（原左下斜线）
+        drawLine(x, y + size * 0.5f, x - width * 0.3f, y, r, g, b, a);
     }
 }

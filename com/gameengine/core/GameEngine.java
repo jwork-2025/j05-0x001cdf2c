@@ -18,6 +18,7 @@ public class GameEngine {
     private long lastTime;
     private String title;
     private Timer gameTimer;
+    private com.gameengine.recording.RecordingService recordingService;
     
     public GameEngine(int width, int height, String title) {
         this.title = title;
@@ -59,7 +60,7 @@ public class GameEngine {
                 render();
             }
         });
-        
+
         gameTimer.start();
     }
     
@@ -71,7 +72,7 @@ public class GameEngine {
         long currentTime = System.nanoTime();
         deltaTime = (currentTime - lastTime) / 1_000_000_000.0f; // 转换为秒
         lastTime = currentTime;
-        System.out.printf("FPS:%.1f\n",1.0/deltaTime);
+        //System.out.printf("FPS:%.1f\n",1.0/deltaTime);
         // 更新输入
         inputManager.update();
         
@@ -141,7 +142,7 @@ public class GameEngine {
     /**
      * 清理资源
      */
-    private void cleanup() {
+    public void cleanup() {
         if (currentScene != null) {
             currentScene.clear();
         }
@@ -191,5 +192,25 @@ public class GameEngine {
      */
     public boolean isRunning() {
         return running;
+    }
+
+    
+    // 可选：外部启用录制（按需调用）
+    public void enableRecording(com.gameengine.recording.RecordingService service) {
+        this.recordingService = service;
+        try {
+            if (service != null && currentScene != null) {
+                service.start(currentScene, renderer.getWidth(), renderer.getHeight());
+            }
+        } catch (Exception e) {
+            System.err.println("录制启动失败: " + e.getMessage());
+        }
+    }
+
+    public void disableRecording() {
+        if (recordingService != null && recordingService.isRecording()) {
+            try { recordingService.stop(); } catch (Exception ignored) {}
+        }
+        recordingService = null;
     }
 }

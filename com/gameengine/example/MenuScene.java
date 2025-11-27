@@ -60,12 +60,11 @@ public class MenuScene extends Scene {
 
         handleMenuSelection();
 
-        if (selectionMade && selectedOption == MenuOption.START_GAME) 
-        {
+        if (selectionMade && selectedOption == MenuOption.START_GAME) {
             Scene gameScene = new GameScene(engine);
             engine.setScene(gameScene);
             try {
-                //当选择了开始游戏，那么就开始录制
+                // 当选择了开始游戏，那么就开始录制
                 new File("recordings").mkdirs();
                 String path = "recordings/session_" + System.currentTimeMillis() + ".jsonl";
                 RecordingConfig cfg = new RecordingConfig(path);

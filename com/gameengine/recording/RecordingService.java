@@ -42,6 +42,7 @@ public class RecordingService {
     }
 
     public void start(Scene scene, int width, int height) throws IOException {
+        System.out.printf("record start\n");
         if (recording)
             return;
         storage.openWriter(config.outputPath);
@@ -145,7 +146,7 @@ public class RecordingService {
                     .append("\"id\":\"").append(obj.getName()).append("\",")
                     .append("\"x\":").append(qfmt.format(x)).append(',')
                     .append("\"y\":").append(qfmt.format(y));
-
+            //System.out.printf("%s\n",obj.getName());
             // 可选渲染信息（若对象带有 RenderComponent，则记录形状、尺寸、颜色）
             com.gameengine.components.RenderComponent rc = obj
                     .getComponent(com.gameengine.components.RenderComponent.class);

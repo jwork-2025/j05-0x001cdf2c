@@ -81,6 +81,9 @@ public class GameEngine {
             currentScene.update(deltaTime);
         }
         
+        if (recordingService != null && recordingService.isRecording()) {
+            recordingService.update(deltaTime, currentScene, inputManager);
+        }
         // 处理事件
         renderer.pollEvents();
         

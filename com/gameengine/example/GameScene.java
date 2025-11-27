@@ -51,8 +51,7 @@ public class GameScene extends Scene {
                 // 使用游戏逻辑类处理游戏规则
                 gameLogic.handlePlayerInput();
                 gameLogic.updatePhysics();
-                if(gameLogic.checkCollisions()==1)
-                {
+                if (gameLogic.checkCollisions() == 1) {
                         MenuScene menu = new MenuScene(engine, "MainMenu");
                         engine.setScene(menu);
                 }
@@ -63,6 +62,7 @@ public class GameScene extends Scene {
                         createEnemy_1();
                         time = 0;
                 }
+
         }
 
         @Override
@@ -79,6 +79,7 @@ public class GameScene extends Scene {
                 // 创建葫芦娃 - 所有部位都在一个GameObject中
                 GameObject player = new GameObject("Player") {
                         private Vector2 basePosition;
+
                         @Override
                         public void update(float deltaTime) {
                                 super.update(deltaTime);
